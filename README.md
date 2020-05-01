@@ -13,5 +13,5 @@ Crear un  perfil de autenticación para cuenta de aws con el nombre shotty en el
 ## Ejecutar el script
 
 `"python main.py <command <--project=PROJECT>"`
-*command* es list, start, o stop
-*project es opcional
+**command:**  list, start, o stop
+**project** es opcional
