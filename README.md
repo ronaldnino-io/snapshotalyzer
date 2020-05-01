@@ -10,6 +10,6 @@ Este proyecto es un demo que  usa boto3 de python para administrar instancia AWS
 
 Crear un  perfil de autenticación para cuenta de aws con el nombre shotty en el AWS CLI.
 
-##Ejecutar el script
+## Ejecutar el script
 
 `python main.py`
