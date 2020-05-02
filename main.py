@@ -66,7 +66,11 @@ def stop_instances(project):
 
     for instance in instances:
         print ("Stopping {0}...".format(instance.id))
-        instance.stop()
+        try:
+            instance.stop()
+        except botocore.exceptions.ClientError as e:
+            print(" Cloud not stop {0}".format(instance.id) + str(e))
+            continue
     return
 
 #Funcion que inicia las instancias de una cuenta AWS
@@ -79,7 +83,11 @@ def start_instance(project):
 
     for instance in instances:
         print ("Starting {0}...".format(instance.id))
-        instance.start()
+        try:
+            instance.start()
+        except botocore.exceptions.ClientError as e:
+            print(" Cloud not start {0}".format(instance.id) + str(e))
+            continue
     return
 
 @instances.command('snapshot', help="Create snapshots of all volumes")
@@ -90,10 +98,19 @@ def create_snapshots(project):
     instances = filter_instances(project)
 
     for instance in instances:
+        print("Stopping {0}...".format(instance.id))
         instance.stop()
+        instance.wait_until_stopped()
         for volume in instance.volumes.all():
             print("Creating snapshot of {0}".format(volume.id))
             volume.create_snapshot(Description="Created by SnapshotAlyzer")
+        
+        print("Starting {0}...".format(instance.id))
+
+        instance.start()
+        instance.wait_until_running()
+    
+    print("Job's done!")
 
     return
 
