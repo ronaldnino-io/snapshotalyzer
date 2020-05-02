@@ -16,3 +16,4 @@ Crear un  perfil de autenticación para cuenta de aws con el nombre shotty en el
 **command:**  instances, volumes, o snapshots
 **subcommand:** depende del command
 **project:** es opcional
+
