@@ -26,8 +26,12 @@ def filter_instances(project):
         instances = ec2.instances.all()
     return instances
 
-#Funcion que nos lista las instancias de una cuenta en AWS
 @click.group()
+def cli():
+    """Shotty manages snapshots"""
+        
+#Funcion que nos lista las instancias de una cuenta en AWS
+@cli.group("instances")
 def instances():
     """Commands for instances"""
 
@@ -68,7 +72,7 @@ def stop_instances(project):
 #Funcion que inicia las instancias de una cuenta AWS
 @instances.command('start')
 @click.option('--project', default=None, help='Only instances for project')
-def stop_instances(project):
+def start_instance(project):
     "Start EC2 instances"
     
     instances = filter_instances(project)
@@ -78,7 +82,73 @@ def stop_instances(project):
         instance.start()
     return
 
+@instances.command('snapshot', help="Create snapshots of all volumes")
+@click.option('--project', default=None, help='Only instances for project')
+def create_snapshots(project):
+    "Create snapshots for EC2 instances"
+    
+    instances = filter_instances(project)
+
+    for instance in instances:
+        instance.stop()
+        for volume in instance.volumes.all():
+            print("Creating snapshot of {0}".format(volume.id))
+            volume.create_snapshot(Description="Created by SnapshotAlyzer")
+
+    return
+
+@cli.group('snapshots')
+def snapshots():
+    """Commands for snapshots"""
+
+@snapshots.command("list")
+@click.option('--project', default=None,
+    help='Only snapshots for project (tag Project:<name>)')
+
+def list_snapshots(project):
+    "list EC2 snapshots"
+    
+    instances = filter_instances(project)
+
+    for instance in instances:
+        for volume in instance.volumes.all():
+            for snapshot in volume.snapshots.all():
+                print(", ".join((
+                    snapshot.id,
+                    volume.id,
+                    instance.id,
+                    snapshot.state,
+                    snapshot.progress,
+                    snapshot.start_time.strftime("%c")
+                )))
+    return
+
+#@click.option()
+@cli.group('volumes')
+def volumes():
+    """Commands for volumes"""
+
+@volumes.command("list")
+@click.option('--project', default=None,
+    help='Only intances for project (tag Project:<name>)')
+
+def list_volumes(project):
+    "list EC2 volumes"
+    
+    instances = filter_instances(project)
+    
+    for instance in instances:
+        for volume in instance.volumes.all():
+            print(', '.join((
+                volume.id,
+                instance.id,
+                volume.state,
+                str(volume.size) + "GiB",
+                volume.encrypted and "Encryted" or "Not Encryted"
+                )))
+    return 
+
 
    
 if __name__ == '__main__':
-    instances()
+    cli()
