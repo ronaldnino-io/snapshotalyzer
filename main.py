@@ -39,7 +39,7 @@ def instances():
 @click.option('--project', default=None,
     help='Only intances for project (tag Project:<name>)')
 def list_instances(project):
-    "list EC2 instances"
+    "List EC2 instances"
     
     instances = filter_instances(project)
     
@@ -123,7 +123,7 @@ def snapshots():
     help='Only snapshots for project (tag Project:<name>)')
 
 def list_snapshots(project):
-    "list EC2 snapshots"
+    "List EC2 snapshots"
     
     instances = filter_instances(project)
 
@@ -150,7 +150,7 @@ def volumes():
     help='Only intances for project (tag Project:<name>)')
 
 def list_volumes(project):
-    "list EC2 volumes"
+    "List EC2 volumes"
     
     instances = filter_instances(project)
     
