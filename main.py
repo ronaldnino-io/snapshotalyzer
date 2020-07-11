@@ -9,14 +9,14 @@ import boto3
 import click
 
 #Iniciamos una sesión con una cuenta de AWS
-session =  boto3.Session(profile_name='shotty')
+session =  boto3.Session(profile_name='default')
 
 #Nos conectamos al servicio de aec2
 ec2 =  session.resource('ec2')
 
 #Funcion que nos devuelve una lista de instancias filtrada por el tag project
 def filter_instances(project):
-    
+
     instances = []
 
     if project:
@@ -28,8 +28,8 @@ def filter_instances(project):
 
 @click.group()
 def cli():
-    """Shotty manages snapshots"""
-        
+    """Profile manages snapshots"""
+
 #Funcion que nos lista las instancias de una cuenta en AWS
 @cli.group("instances")
 def instances():
@@ -40,9 +40,9 @@ def instances():
     help='Only intances for project (tag Project:<name>)')
 def list_instances(project):
     "List EC2 instances"
-    
+
     instances = filter_instances(project)
-    
+
     for instance in instances:
         tags = {t['Key']: t['Value'] for t  in instance.tags or []}
         print(', '.join((
@@ -51,10 +51,10 @@ def list_instances(project):
             instance.placement['AvailabilityZone'],
             instance.state['Name'],
             instance.public_dns_name,
-            tags.get('Project', '<no project>'
-            
+            tags.get('project', '<no project>'
+
             ))))
-    return        
+    return
 
 #Funcion que pausa las instancias de una cuenta AWS
 @instances.command('stop')
@@ -78,7 +78,7 @@ def stop_instances(project):
 @click.option('--project', default=None, help='Only instances for project')
 def start_instance(project):
     "Start EC2 instances"
-    
+
     instances = filter_instances(project)
 
     for instance in instances:
@@ -94,7 +94,7 @@ def start_instance(project):
 @click.option('--project', default=None, help='Only instances for project')
 def create_snapshots(project):
     "Create snapshots for EC2 instances"
-    
+
     instances = filter_instances(project)
 
     for instance in instances:
@@ -104,12 +104,12 @@ def create_snapshots(project):
         for volume in instance.volumes.all():
             print("Creating snapshot of {0}".format(volume.id))
             volume.create_snapshot(Description="Created by SnapshotAlyzer")
-        
+
         print("Starting {0}...".format(instance.id))
 
         instance.start()
         instance.wait_until_running()
-    
+
     print("Job's done!")
 
     return
@@ -124,7 +124,7 @@ def snapshots():
 
 def list_snapshots(project):
     "List EC2 snapshots"
-    
+
     instances = filter_instances(project)
 
     for instance in instances:
@@ -151,9 +151,9 @@ def volumes():
 
 def list_volumes(project):
     "List EC2 volumes"
-    
+
     instances = filter_instances(project)
-    
+
     for instance in instances:
         for volume in instance.volumes.all():
             print(', '.join((
@@ -163,9 +163,9 @@ def list_volumes(project):
                 str(volume.size) + "GiB",
                 volume.encrypted and "Encryted" or "Not Encryted"
                 )))
-    return 
+    return
 
 
-   
+
 if __name__ == '__main__':
     cli()
